@@ -4,7 +4,7 @@
   <title><![CDATA[Jim White's Blog]]></title>
   <link href="http://jimwhite.github.io/atom.xml" rel="self"/>
   <link href="http://jimwhite.github.io/"/>
-  <updated>2014-10-29T10:34:16-07:00</updated>
+  <updated>2014-10-29T16:18:58-07:00</updated>
   <id>http://jimwhite.github.io/</id>
   <author>
     <name><![CDATA[Jim White]]></name>
@@ -25,7 +25,7 @@
 <div class="embed-video-container"><iframe style="height: 400px; width:100%" src="http://www.youtube.com/embed/Fh7E9kI1gc0 "></iframe></div>
 
 
-<p>This demonstration is on Mac OS X but the process is similar for Windows or Linux.  The first step is installing Docker : <a href="https://docs.docker.com/installation/#installation">all platforms</a>, <a href="https://docs.docker.com/installation/mac/">Mac OS X</a>, <a href="https://docs.docker.com/installation/windows/">Windows</a> (The last two include videos).  With that done, you only need a few simple commands to start the ParsingShell or other BLLIP parser Python scripts.  So open a Terminal window and enter:</p>
+<p>This demonstration is on Mac OS X but the process is similar for Windows or Linux.  The first step is installing Docker : <a href="https://docs.docker.com/installation/#installation">all platforms</a>, <a href="https://docs.docker.com/installation/mac/">Mac OS X</a>, <a href="https://docs.docker.com/installation/windows/">Windows</a> (the last two include videos).  With that done, you only need a few simple commands to start the ParsingShell or other BLLIP parser Python scripts.  So open a Terminal window and enter:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>$ docker run -it --rm -p 5901:5901 jimwhite/bllip-parser-python</span></code></pre></td></tr></table></div></figure>
