@@ -4,7 +4,7 @@
   <title><![CDATA[Jim White's Blog]]></title>
   <link href="http://jimwhite.github.io/atom.xml" rel="self"/>
   <link href="http://jimwhite.github.io/"/>
-  <updated>2014-10-29T02:15:48-07:00</updated>
+  <updated>2014-10-29T10:34:16-07:00</updated>
   <id>http://jimwhite.github.io/</id>
   <author>
     <name><![CDATA[Jim White]]></name>
@@ -69,7 +69,7 @@
 </span><span class='line'>Log file is /root/.vnc/c495504daf8d:1.log</span></code></pre></td></tr></table></div></figure>
 
 
-<p>That prompts for a password (which won&rsquo;t actually be used in this setup) and then starts the VNC server.</p>
+<p>That prompts for a password to secure the VNC server (which won&rsquo;t actually be used in this setup and can be anything of at least six characters) and then starts it.</p>
 
 <p>Now you need to open a VNC client, which on Mac is easy since there is one built in.  For Windows you&rsquo;ll need to install additional software like <a href="http://www.tightvnc.com/">TightVNC</a>.  One way to use the built-in Mac OS X VNC client is to open new Terminal window (command-N) and use the <code>open</code> command.  I show here checking for the Boot2Docker VM IP address and then opening the VNC client:</p>
 
