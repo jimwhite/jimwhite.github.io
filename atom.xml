@@ -4,7 +4,7 @@
   <title><![CDATA[Jim White's Blog]]></title>
   <link href="http://jimwhite.github.io/atom.xml" rel="self"/>
   <link href="http://jimwhite.github.io/"/>
-  <updated>2014-08-06T19:19:35-07:00</updated>
+  <updated>2014-10-29T02:15:48-07:00</updated>
   <id>http://jimwhite.github.io/</id>
   <author>
     <name><![CDATA[Jim White]]></name>
@@ -12,5 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[BLLIP ParsingShell NLTK+Tk Quickstart Using Docker]]></title>
+    <link href="http://jimwhite.github.io/blog/2014/10/28/bllip-parsingshell/"/>
+    <updated>2014-10-28T23:12:40-07:00</updated>
+    <id>http://jimwhite.github.io/blog/2014/10/28/bllip-parsingshell</id>
+    <content type="html"><![CDATA[<p>Running the <a href="https://github.com/BLLIP/bllip-parser">BLLIP parser</a>&rsquo;s <a href="https://pypi.python.org/pypi/bllipparser/">GUI parsing shell</a> involves installing several command line tools and can be troublesome for non-Linux platforms &hellip; until now!  Thanks to <a href="http://www.docker.com">Docker</a> running almost any kind of Linux software on almost any platform can be super simple.  Even if the application you need isn&rsquo;t already &ldquo;Dockerized&rdquo;, using Docker means that things that &ldquo;just work&rdquo; on Linux will &ldquo;just work&rdquo; for you too!</p>
+
+<p>Here&rsquo;s a brief demonstration video:</p>
+
+<div class="embed-video-container"><iframe style="height: 400px; width:100%" src="http://www.youtube.com/embed/Fh7E9kI1gc0 "></iframe></div>
+
+
+<p>This demonstration is on Mac OS X but the process is similar for Windows or Linux.  The first step is installing Docker : <a href="https://docs.docker.com/installation/#installation">all platforms</a>, <a href="https://docs.docker.com/installation/mac/">Mac OS X</a>, <a href="https://docs.docker.com/installation/windows/">Windows</a> (The last two include videos).  With that done, you only need a few simple commands to start the ParsingShell or other BLLIP parser Python scripts.  So open a Terminal window and enter:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ docker run -it --rm -p 5901:5901 jimwhite/bllip-parser-python</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>-it</code> means &ldquo;interactive + terminal&rdquo; mode, the <code>--rm</code> means &ldquo;remove this container after this command exits&rdquo;, the <code>-p 5901:5901</code> makes TCP port 5901 accessible (we&rsquo;ll be using this to access graphics from inside the container using <a href="http://www.tightvnc.com/">VNC</a>), and the <code>jimwhite/bllip-parser-python</code> means load the Docker image I&rsquo;ve put on the Docker Hub Registry <a href="https://registry.hub.docker.com/u/jimwhite/bllip-parser-python/">here</a>.  Because the image contains most of Ubuntu the size is about 1.2G and so may take a few minutes to download the first time.</p>
+
+<p>Docker will run the image in a container and the initial command here is another shell and so you&rsquo;ll see the usual prompt, although from Linux here.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@d45e10a5bd3f:~# </span></code></pre></td></tr></table></div></figure>
+
+
+<p>At this point if you want to use the command line (CLI) then you could enter the Python commands for the parser wrapper just as they&rsquo;re shown on <a href="https://pypi.python.org/pypi/bllipparser/">the PyPi web page</a>.  To use the GUI though we need to start the VNC server by entering <code>./runvnc.sh</code> like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@d45e10a5bd3f:~# ./runvnc.sh
+</span><span class='line'>
+</span><span class='line'>You will require a password to access your desktops.
+</span><span class='line'>
+</span><span class='line'>Password: 
+</span><span class='line'>Verify:   
+</span><span class='line'>Would you like to enter a view-only password (y/n)? n
+</span><span class='line'>xauth:  file /root/.Xauthority does not exist
+</span><span class='line'>
+</span><span class='line'>New 'X' desktop is c495504daf8d:1
+</span><span class='line'>
+</span><span class='line'>Starting applications specified in /root/.vnc/xstartup
+</span><span class='line'>Log file is /root/.vnc/c495504daf8d:1.log</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That prompts for a password (which won&rsquo;t actually be used in this setup) and then starts the VNC server.</p>
+
+<p>Now you need to open a VNC client, which on Mac is easy since there is one built in.  For Windows you&rsquo;ll need to install additional software like <a href="http://www.tightvnc.com/">TightVNC</a>.  One way to use the built-in Mac OS X VNC client is to open new Terminal window (command-N) and use the <code>open</code> command.  I show here checking for the Boot2Docker VM IP address and then opening the VNC client:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Fawkes:~ jim$ boot2docker ip
+</span><span class='line'>
+</span><span class='line'>The VM's Host only interface IP address is: 192.168.59.103
+</span><span class='line'>
+</span><span class='line'>Fawkes:~ jim$ open vnc://192.168.59.103:5901</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Also you can enter that URL in Safari&rsquo;s location bar:
+<img class="center" src="http://jimwhite.github.io/images/posts/2014-10-28-safari.png"></p>
+
+<p>That will ask for confirmation:
+<img class="center" src="http://jimwhite.github.io/images/posts/2014-10-28-connect.png"></p>
+
+<p>Then show the initial Ubuntu desktop with an LXTerminal opened for you:
+<img class="center" src="http://jimwhite.github.io/images/posts/2014-10-28-vnc-new.png"></p>
+
+<p>Use that terminal to enter the Python commands for the parsing shell.  Firefox is available inside the container because you can&rsquo;t copy &amp; paste outside it in this setup (icon for the web browser is in the lower left).
+<img class="center" src="http://jimwhite.github.io/images/posts/2014-10-28-vnc-bllip-python.png"></p>
+
+<p>When you&rsquo;re done, just return to the Docker container&rsquo;s prompt and <code>exit</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@f3bbe322d4b5:~# exit
+</span><span class='line'>logout
+</span><span class='line'>Fawkes:~ jim$ </span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
 </feed>
