@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Jim White's Blog</title>
+  <title>Condor in a Container: Running HTCondor With Kubernetes on GCE - Jim White's Blog</title>
   <meta name="author" content="Jim White">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://jimwhite.github.io">
+  <link rel="canonical" href="http://jimwhite.github.io/blog/2014/11/12/condor-in-a-container">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Jim White's Blog" type="application/atom+xml">
@@ -63,15 +63,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/11/12/condor-in-a-container/">Condor in a Container: Running HTCondor With Kubernetes on GCE</a></h1>
+      <h1 class="entry-title">Condor in a Container: Running HTCondor With Kubernetes on GCE</h1>
     
     
       <p class="meta">
@@ -94,7 +91,7 @@
   </header>
 
 
-  <div class="entry-content"><p>Many of us have long had a dream in which personal cloud (née grid) computing is as easy as, and works with the same programming setup, as desktop computing.  Various approximations of that capability exist now but largely depend on institutional or corporate systems, dedicated system administrators, and in many other ways sacrifice the essentially independent nature of personal computers.  This year though it is clear we&rsquo;re getting very close to personal cloud computing without compromise.  The first big sign was the splashy arrival of <a href="https://www.docker.com/">Docker</a> which gives us freedom inside a Linux container and manageability across deployment platforms.  The second shoe to drop seems to be <a href="https://github.com/GoogleCloudPlatform/kubernetes">Google&rsquo;s Kubernetes</a> which cloud computing providers of all stripes have adopted for orchestrating Docker containers. Proposals shown at <a href="https://blog.docker.com/2014/10/announcing-docker-global-hack-day-2/">Docker Global Hack Day #2</a> suggest that we can expect such things to become easily accessible by being integrated into Docker itself as well.</p>
+<div class="entry-content"><p>Many of us have long had a dream in which personal cloud (née grid) computing is as easy as, and works with the same programming setup, as desktop computing.  Various approximations of that capability exist now but largely depend on institutional or corporate systems, dedicated system administrators, and in many other ways sacrifice the essentially independent nature of personal computers.  This year though it is clear we&rsquo;re getting very close to personal cloud computing without compromise.  The first big sign was the splashy arrival of <a href="https://www.docker.com/">Docker</a> which gives us freedom inside a Linux container and manageability across deployment platforms.  The second shoe to drop seems to be <a href="https://github.com/GoogleCloudPlatform/kubernetes">Google&rsquo;s Kubernetes</a> which cloud computing providers of all stripes have adopted for orchestrating Docker containers. Proposals shown at <a href="https://blog.docker.com/2014/10/announcing-docker-global-hack-day-2/">Docker Global Hack Day #2</a> suggest that we can expect such things to become easily accessible by being integrated into Docker itself as well.</p>
 
 <p>My current programming work involves computational linguistics machine learning experiments, which most often means running <a href="http://research.cs.wisc.edu/htcondor/">HTCondor</a> <a href="http://research.cs.wisc.edu/htcondor/dagman/dagman.html">DAGman</a> workflows in order to provide concurrency for complex compute jobs.  Naturally what I would like to have is a way to develop such programs that is seamless from my desktop (for code, test, and small jobs) to the cloud.  HTCondor works fine on desktops, grids, and clouds but the installation, configuration, and administration for each of those environments is different, fiddly, and often time consuming. Therefore I&rsquo;ve taken a stab at packaging up HTCondor in a Docker container and configuring it for Kubernetes to run on Google Compute Engine.  The current setup is mostly a proof-of-concept at this stage but I wanted to share the details so other who are interested can give it a whirl.</p>
 
@@ -236,22 +233,16 @@
 
 <p>There remain several things to do to make this a truly easy-to-use and seamless research tool.  A key reason for using Docker here besides leveraging cloud services is being able to containerize the application being run.  While Docker images as Condor job executables is a natural progression (as is Docker volume-based data management), the model we have here is just as good for many purposes since we just bundle Condor and the application together in a single image.  The way I plan to use that is to add a submit-only pod which submits the workflow and deals with data management.  Of course for bigger data workflows a distributed data management tool such as GlusterFS or HDFS would be used (both of which have already have been Dockerized).</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/10/28/bllip-parsingshell/">BLLIP ParsingShell NLTK+Tk Quickstart Using Docker</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Jim White</span></span>
+
+      
 
 
 
@@ -263,114 +254,32 @@
   
 
 
-<time datetime="2014-10-28T23:12:40-07:00" pubdate data-updated="true">Oct 28<sup>th</sup>, 2014</time>
-        
-      </p>
+<time datetime="2014-11-12T02:05:33-08:00" pubdate data-updated="true">Nov 12<sup>th</sup>, 2014</time>
+      
+
+
+    </p>
     
-  </header>
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://jimwhite.github.io/blog/2014/11/12/condor-in-a-container/" data-via="oohtml" data-counturl="http://jimwhite.github.io/blog/2014/11/12/condor-in-a-container/" >Tweet</a>
+  
+  
+  
+</div>
 
-
-  <div class="entry-content"><p>Running the <a href="https://github.com/BLLIP/bllip-parser">BLLIP parser</a>&rsquo;s <a href="https://pypi.python.org/pypi/bllipparser/">GUI parsing shell</a> involves installing several command line tools and can be troublesome for non-Linux platforms &hellip; until now!  Thanks to <a href="http://www.docker.com">Docker</a> running almost any kind of Linux software on almost any platform can be super simple.  Even if the application you need isn&rsquo;t already &ldquo;dockerized&rdquo;, using Docker means that things that &ldquo;just work&rdquo; on Linux will &ldquo;just work&rdquo; for you too!</p>
-
-<p>Here&rsquo;s a brief demonstration video:</p>
-
-<div class="embed-video-container"><iframe style="height: 400px; width:100%" src="http://www.youtube.com/embed/Fh7E9kI1gc0 "></iframe></div>
-
-
-<p>This demonstration is on Mac OS X but the process is similar for Windows or Linux.  The first step is installing Docker : <a href="https://docs.docker.com/installation/#installation">all platforms</a>, <a href="https://docs.docker.com/installation/mac/">Mac OS X</a>, <a href="https://docs.docker.com/installation/windows/">Windows</a> (the last two include videos).  With that done, you only need a few simple commands to start the ParsingShell or other BLLIP parser Python scripts.  So open a Terminal window and enter:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ docker run -it --rm -p 5901:5901 jimwhite/bllip-parser-python</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The <code>-it</code> means &ldquo;interactive + terminal&rdquo; mode, the <code>--rm</code> means &ldquo;remove this container after this command exits&rdquo;, the <code>-p 5901:5901</code> makes TCP port 5901 accessible (we&rsquo;ll be using this to access graphics from inside the container using <a href="http://www.tightvnc.com/">VNC</a>), and the <code>jimwhite/bllip-parser-python</code> means load the Docker image I&rsquo;ve put on the Docker Hub Registry <a href="https://registry.hub.docker.com/u/jimwhite/bllip-parser-python/">here</a>.  Because the image contains most of Ubuntu the size is about 1.2G and so may take a few minutes to download the first time.</p>
-
-<p>Docker will run the image in a container and the initial command here is another shell and so you&rsquo;ll see a Bash prompt, although from Linux here.</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>root@d45e10a5bd3f:~# </span></code></pre></td></tr></table></div></figure>
-
-
-<p>At this point if you want to use the command line (CLI) then you could enter the Python commands for the parser wrapper just as they&rsquo;re shown on <a href="https://pypi.python.org/pypi/bllipparser/">the PyPi web page</a>.  To use the GUI though we need to start a VNC server by entering <code>./runvnc.sh</code> like this:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>root@d45e10a5bd3f:~# ./runvnc.sh
-</span><span class='line'>
-</span><span class='line'>You will require a password to access your desktops.
-</span><span class='line'>
-</span><span class='line'>Password: 
-</span><span class='line'>Verify:   
-</span><span class='line'>Would you like to enter a view-only password (y/n)? n
-</span><span class='line'>xauth:  file /root/.Xauthority does not exist
-</span><span class='line'>
-</span><span class='line'>New 'X' desktop is c495504daf8d:1
-</span><span class='line'>
-</span><span class='line'>Starting applications specified in /root/.vnc/xstartup
-</span><span class='line'>Log file is /root/.vnc/c495504daf8d:1.log</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That prompts for a password to secure the VNC server (which won&rsquo;t actually be used in this setup and can be anything of at least six characters) and then starts it.</p>
-
-<p>Now you need to open a VNC client, which on Mac is easy since there is one built in.  For Windows you&rsquo;ll need to install additional software like <a href="http://www.tightvnc.com/">TightVNC</a>.  One way to use the built-in Mac OS X VNC client is to open new Terminal window (command-N) and use the <code>open</code> command.  I show here checking for the Boot2Docker VM IP address and then opening the VNC client:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Fawkes:~ jim$ boot2docker ip
-</span><span class='line'>
-</span><span class='line'>The VM's Host only interface IP address is: 192.168.59.103
-</span><span class='line'>
-</span><span class='line'>Fawkes:~ jim$ open vnc://192.168.59.103:5901</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Or you can enter that URL in Safari&rsquo;s location bar:
-<img class="center" src="/images/posts/2014-10-28-safari.png"></p>
-
-<p>That will ask for confirmation:
-<img class="center" src="/images/posts/2014-10-28-connect.png"></p>
-
-<p>Then show the initial Ubuntu desktop with an LXTerminal window opened for you:
-<img class="center" src="/images/posts/2014-10-28-vnc-new.png"></p>
-
-<p>Use that terminal to enter the Python commands for the parsing shell.  Firefox is available inside the container because you can&rsquo;t copy &amp; paste outside it in this setup (icon for the web browser is in the lower left).
-<img class="center" src="/images/posts/2014-10-28-vnc-bllip-python.png"></p>
-
-<p>When you&rsquo;re done, just return to the Docker container&rsquo;s prompt and <code>exit</code>:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>root@f3bbe322d4b5:~# exit
-</span><span class='line'>logout
-</span><span class='line'>Fawkes:~ jim$ </span></code></pre></td></tr></table></div></figure>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/10/28/bllip-parsingshell/" title="Previous Post: BLLIP ParsingShell NLTK+Tk Quickstart using Docker">&laquo; BLLIP ParsingShell NLTK+Tk Quickstart using Docker</a>
+      
+      
+    </p>
+  </footer>
+</article>
 
 </div>
-  
-  
 
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
@@ -391,7 +300,7 @@
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   
   <a href="https://github.com/jimwhite">@jimwhite</a> on GitHub
@@ -439,6 +348,7 @@
 
   
 </aside>
+
 
     </div>
   </div>

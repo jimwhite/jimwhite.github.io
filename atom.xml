@@ -4,7 +4,7 @@
   <title><![CDATA[Jim White's Blog]]></title>
   <link href="http://jimwhite.github.io/atom.xml" rel="self"/>
   <link href="http://jimwhite.github.io/"/>
-  <updated>2014-10-29T21:37:40-07:00</updated>
+  <updated>2014-11-12T03:16:05-08:00</updated>
   <id>http://jimwhite.github.io/</id>
   <author>
     <name><![CDATA[Jim White]]></name>
@@ -12,6 +12,155 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Condor in a Container: Running HTCondor With Kubernetes on GCE]]></title>
+    <link href="http://jimwhite.github.io/blog/2014/11/12/condor-in-a-container/"/>
+    <updated>2014-11-12T02:05:33-08:00</updated>
+    <id>http://jimwhite.github.io/blog/2014/11/12/condor-in-a-container</id>
+    <content type="html"><![CDATA[<p>Many of us have long had a dream in which personal cloud (née grid) computing is as easy as, and works with the same programming setup, as desktop computing.  Various approximations of that capability exist now but largely depend on institutional or corporate systems, dedicated system administrators, and in many other ways sacrifice the essentially independent nature of personal computers.  This year though it is clear we&rsquo;re getting very close to personal cloud computing without compromise.  The first big sign was the splashy arrival of <a href="https://www.docker.com/">Docker</a> which gives us freedom inside a Linux container and manageability across deployment platforms.  The second shoe to drop seems to be <a href="https://github.com/GoogleCloudPlatform/kubernetes">Google&rsquo;s Kubernetes</a> which cloud computing providers of all stripes have adopted for orchestrating Docker containers. Proposals shown at <a href="https://blog.docker.com/2014/10/announcing-docker-global-hack-day-2/">Docker Global Hack Day #2</a> suggest that we can expect such things to become easily accessible by being integrated into Docker itself as well.</p>
+
+<p>My current programming work involves computational linguistics machine learning experiments, which most often means running <a href="http://research.cs.wisc.edu/htcondor/">HTCondor</a> <a href="http://research.cs.wisc.edu/htcondor/dagman/dagman.html">DAGman</a> workflows in order to provide concurrency for complex compute jobs.  Naturally what I would like to have is a way to develop such programs that is seamless from my desktop (for code, test, and small jobs) to the cloud.  HTCondor works fine on desktops, grids, and clouds but the installation, configuration, and administration for each of those environments is different, fiddly, and often time consuming. Therefore I&rsquo;ve taken a stab at packaging up HTCondor in a Docker container and configuring it for Kubernetes to run on Google Compute Engine.  The current setup is mostly a proof-of-concept at this stage but I wanted to share the details so other who are interested can give it a whirl.</p>
+
+<h2>Prerequisites</h2>
+
+<p>Getting all this stuff set up belies the ease-of-use I have in mind which is that it will eventually be no more involved than installing Docker and signing up for a Google Cloud account, but such is life on the bleeding edge.</p>
+
+<ul>
+<li>Install Docker.  Works for Mac OS X, Windows, and Linux (easy click-to-install for the first two).  Instructions <a href="https://docs.docker.com/installation/">here</a>.</li>
+<li>Install the Google Cloud SDK.  Instructions <a href="https://cloud.google.com/sdk/">here</a>. If you haven&rsquo;t used GCE before then you should go through the <a href="https://cloud.google.com/compute/docs/quickstart">Quickstart</a> to get your credentials set up and installation checked out.  Be sure to set your default project id  with <code>gcloud config set project &lt;your-project-id&gt;</code>.</li>
+<li>Create a project on Google Cloud using the Developer Console.  You&rsquo;ll need to have an account with billing enabled.  There are free credit deals for new users.  Enable the cloud and compute engine APIs (a few of these aren&rsquo;t strictly needed but do no harm here):
+
+<ul>
+<li>Google Cloud Datastore API</li>
+<li>Google Cloud Deployment Manager API</li>
+<li>Google Cloud DNS API</li>
+<li>Google Cloud Monitoring API</li>
+<li>Google Cloud Storage</li>
+<li>Google Cloud Storage JSON API</li>
+<li>Google Compute Engine
+
+<ul>
+<li>I&rsquo;ve had trouble with the quota setting for this.  You should get 24 CPUs per region by default, but apparently enabling some other API can change that to 8 or 2.  The solution I found is to disable GCE then reenable it.  The most repeatable results seem to come from enabling the other APIs then enable GCE by clicking on the &ldquo;VM instances&rdquo; item in the Compute Engine menu (which may require a browser page reload).</li>
+</ul>
+</li>
+<li>Google Compute Engine Autoscaler API</li>
+<li>Google Compute Engine Instance Group Manager API</li>
+<li>Google Compute Engine Instance Groups API</li>
+<li>Google Container Engine API</li>
+</ul>
+</li>
+<li>Install Kubernetes from source.  I recommend against using a binary distribution since the one I used recently didn&rsquo;t work properly.  Instructions <a href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/build">here</a>.  The script you want is <code>build/release.sh</code>.  Set an environment variable <code>KUBE_HOME</code> to the directory where you&rsquo;ve installed Kubernetes for use in the next steps.</li>
+</ul>
+
+
+<h2>Git the Condor-Kubernetes Files</h2>
+
+<p>The Dockerfile and Kubernetes configuration files are on GitHub at <a href="https://github.com/jimwhite/condor-kubernetes">https://github.com/jimwhite/condor-kubernetes</a>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ git clone https://github.com/jimwhite/condor-kubernetes.git
+</span><span class='line'>$ cd condor-kubernetes</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Turn up the Condor-Kubernetes Cluster</h2>
+
+<p>There is a script <code>start-condor-kubernetes.sh</code> that does all these steps at once, but I recommend doing them one-at-a-time so you can see whether they succeed or not.  I&rsquo;ve seen occassions where the cAdvisor monitoring service doesn&rsquo;t start properly, but you can ignore that if you don&rsquo;t need to use it (and it can be loaded separately from the instruction in <code>$KUBE_HOME/examples/monitoring</code>).  The default settings in <code>$KUBE_HOME/cluster/gce/config-default.sh</code> are for <code>NUM_MINIONS=4</code> + 1 master <code>n1-standard-1</code> size instances in zone <code>us-central1-b</code>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kube-up.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There is a trusted build for the Dockerfile I use for HTCondor in the Docker Hub Registry at <a href="https://registry.hub.docker.com/u/jimwhite/condor-kubernetes/">https://registry.hub.docker.com/u/jimwhite/condor-kubernetes/</a>.  To use a different repository you would need to modify the <code>image</code> setting in the <code>condor-manager.json</code> and <code>condor-executor-controller.json</code> files.</p>
+
+<p>Spin up the Condor manager pod.  It is currently configured by the <code>userfiles/start-condor.sh</code> script to be a manager, execute, and submit host.  The execute option is pretty much just for testing though.  The way the script determines whether it is master or not is by looking for the <code>CONDORMANAGER_SERVICE_HOST</code> variable configured by Kubernetes.  Using the Docker-style variables would be the way to go if this container scheme for Condor were used with Docker container linking too.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kubecfg.sh -c condor-manager.json create pods</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Start the Condor manager service.  The executor pods will be routed to the manager via this service by using the <code>CONDORMANAGER_SERVICE_HOST</code> (and <code>..._PORT</code>) environment variables.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kubecfg.sh -c condor-manager-service.json create services</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Start the executor pod replica controller.  The executors currently have submit enabled too, but for applications that don&rsquo;t need that capability it can be omitted to save on network connections (whose open file description space on the collector can be a problem for larger clusters).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kubecfg.sh -c condor-executor-controller.json create replicationControllers</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You should see 3 pods for Condor (one manager and two executors), initially in &lsquo;Pending&rsquo; state and then &lsquo;Running&rsquo; after a few minutes.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kubecfg.sh list pods</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>SSH to a Minion</h2>
+
+<p>Find the id of a minion that is running Condor from the list of pods.  You can then <code>ssh</code> to it thusly:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ gcloud compute ssh --zone us-central1-b root@kubernetes-minion-2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then use <code>docker ps</code> to find the id of the container that is running Condor and use <code>docker exec</code> to run a shell in it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@kubernetes-minion-2:~# docker exec -it fb91ab213aa7 /bin/bash</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And <code>condor_status</code> should show nodes for the manager and the two executor pods:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@24601939-6a55-11e4-b56c-42010af02f49 root]# condor_status
+</span><span class='line'>Name               OpSys      Arch   State     Activity LoadAv Mem   ActvtyTime
+</span><span class='line'>
+</span><span class='line'>24601939-6a55-11e4 LINUX      X86_64 Unclaimed Idle      0.010 3711  0+00:04:36
+</span><span class='line'>2460f5e3-6a55-11e4 LINUX      X86_64 Unclaimed Idle      0.040 3711  0+00:04:35
+</span><span class='line'>condor-manager-1   LINUX      X86_64 Unclaimed Idle      0.020 3711  0+00:04:35
+</span><span class='line'>                     Total Owner Claimed Unclaimed Matched Preempting Backfill
+</span><span class='line'>
+</span><span class='line'>        X86_64/LINUX     3     0       0         3       0          0        0
+</span><span class='line'>
+</span><span class='line'>               Total     3     0       0         3       0          0        0</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Changing the Executor Replica Count</h2>
+
+<p>The Condor Executor pod replica count is currently set to 2 and can be changed using the <code>resize</code> command (see also the <code>$KUBE_HOME/examples/update-demo</code> to see another example of updating the replica count).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kubecfg.sh resize condorExecutorController 6</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you list the pods then you&rsquo;ll see some executors are &lsquo;&lt;unsassigned>&rsquo; because the number of minions is too low.  Auto-scaling for Kubernetes on Google Cloud is currently in the works and is key to making this a generally useful appliance.</p>
+
+<h2>Shut Down the Cluster</h2>
+
+<p>Be sure to turn the lights off when you&rsquo;re done&hellip;</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ $KUBE_HOME/cluster/kube-down.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Next Steps</h2>
+
+<p>There remain several things to do to make this a truly easy-to-use and seamless research tool.  A key reason for using Docker here besides leveraging cloud services is being able to containerize the application being run.  While Docker images as Condor job executables is a natural progression (as is Docker volume-based data management), the model we have here is just as good for many purposes since we just bundle Condor and the application together in a single image.  The way I plan to use that is to add a submit-only pod which submits the workflow and deals with data management.  Of course for bigger data workflows a distributed data management tool such as GlusterFS or HDFS would be used (both of which have already have been Dockerized).</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[BLLIP ParsingShell NLTK+Tk Quickstart Using Docker]]></title>
