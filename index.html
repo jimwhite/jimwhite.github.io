@@ -118,6 +118,7 @@
 
 <ul>
 <li>I&rsquo;ve had trouble with the quota setting for this.  You should get 24 CPUs per region by default, but apparently enabling some other API can change that to 8 or 2.  The solution I found is to disable GCE then reenable it.  The most repeatable results seem to come from enabling the other APIs then enable GCE by clicking on the &ldquo;VM instances&rdquo; item in the Compute Engine menu (which may require a browser page reload).</li>
+<li>Update: This quota resetting behavior is due to having an account set to &ldquo;Free Trial&rdquo; mode.  Upgrade to regular pay and it will stop.  Although it doesn&rsquo;t say so anyplace I could find, it seems that ending the &ldquo;Free Trial&rdquo; period does not erase free credits you may have received when signing up.</li>
 </ul>
 </li>
 <li>Google Compute Engine Autoscaler API</li>
@@ -126,7 +127,12 @@
 <li>Google Container Engine API</li>
 </ul>
 </li>
-<li>Install Kubernetes from source.  I recommend against using a binary distribution since the one I used recently didn&rsquo;t work properly.  Instructions <a href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/build">here</a>.  The script you want is <code>build/release.sh</code>.  Set an environment variable <code>KUBE_HOME</code> to the directory where you&rsquo;ve installed Kubernetes for use in the next steps.</li>
+<li>Install Kubernetes from source.  I recommend against using a binary distribution since the one I used recently didn&rsquo;t work properly.  Instructions <a href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/build">here</a>.  The script you want is <code>build/release.sh</code>.  Set an environment variable <code>KUBE_HOME</code> to the directory where you&rsquo;ve installed Kubernetes for use in the next steps.
+
+<ul>
+<li>Update: Binaries since 0.5.2 should work fine now.  Install instructions <a href="https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/getting-started-guides/gce.md">here</a> and binaries <a href="https://github.com/GoogleCloudPlatform/kubernetes/releases">here</a>.</li>
+</ul>
+</li>
 </ul>
 
 
